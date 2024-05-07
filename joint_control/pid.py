@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '
 
 import numpy as np
 from collections import deque
-from spark_agent import SparkAgent, JOINT_CMD_NAMES
+from spark_agent import SparkAgent, JOINT_CMD_NAMES # type: ignore
 
 
 class PIDController(object):
@@ -34,10 +34,10 @@ class PIDController(object):
         self.e1 = np.zeros(size)
         self.e2 = np.zeros(size)
         # ADJUST PARAMETERS BELOW
-        delay = 0
-        self.Kp = 0
-        self.Ki = 0
-        self.Kd = 0
+        delay = 1
+        self.Kp = 20
+        self.Ki = 0.2
+        self.Kd = -0.1
         self.y = deque(np.zeros(size), maxlen=delay + 1)
 
     def set_delay(self, delay):
@@ -54,6 +54,22 @@ class PIDController(object):
         '''
         # YOUR CODE HERE
 
+        error = target - sensor
+        self.y.appendleft(sensor)
+
+        P = self.Kp * error
+
+        I = self.Ki * np.sum(error * self.dt)
+
+        
+        if len(self.y) > 1:
+            future_error = self.y[0] - self.y[1]
+            D = self.Kd * (future_error / self.dt)
+        else:
+            D = 0
+
+
+        self.u = P + I + D
         return self.u
 
 
