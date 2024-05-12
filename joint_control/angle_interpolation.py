@@ -20,6 +20,7 @@
 '''
 
 
+from scipy.interpolate import CubicSpline
 from pid import PIDAgent
 from keyframes import hello
 
@@ -35,13 +36,39 @@ class AngleInterpolationAgent(PIDAgent):
 
     def think(self, perception):
         target_joints = self.angle_interpolation(self.keyframes, perception)
-        target_joints['RHipYawPitch'] = target_joints['LHipYawPitch'] # copy missing joint in keyframes
+        if 'LHipYawPitch' in target_joints: 
+            target_joints['RHipYawPitch'] = target_joints['LHipYawPitch'] # copy missing joint in keyframes
         self.target_joints.update(target_joints)
         return super(AngleInterpolationAgent, self).think(perception)
 
     def angle_interpolation(self, keyframes, perception):
         target_joints = {}
         # YOUR CODE HERE
+
+        
+        start_time = 5
+        max_time = start_time
+        for joint_name, times, keys in zip(*keyframes):
+
+            # Get Data
+            angles = [0] + [key[0] for key in keys]
+
+            # Perform cubic spline interpolation
+            spline = CubicSpline([start_time] + [(start_time + time) for time in times], angles)
+
+        
+            # Store interpolated angle for current joint perception.time
+            if max_time <= (start_time + times[-1]):
+                max_time = start_time + times[-1]
+            
+            if (perception.time >= start_time and perception.time < max_time):
+                target_joints[joint_name] = spline(perception.time)
+            elif perception.time < start_time:
+                target_joints[joint_name] = spline(start_time)
+            else:
+                target_joints[joint_name] = spline(max_time)
+
+
 
         return target_joints
 
