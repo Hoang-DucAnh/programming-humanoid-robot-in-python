@@ -46,7 +46,7 @@ class AngleInterpolationAgent(PIDAgent):
         # YOUR CODE HERE
 
         
-        start_time = 5
+        start_time = 0
         max_time = start_time
         for joint_name, times, keys in zip(*keyframes):
 

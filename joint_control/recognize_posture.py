@@ -49,7 +49,6 @@ class PostureRecognitionAgent(AngleInterpolationAgent):
 
         # Verwende den geladenen Klassifizierer, um die Haltung vorherzusagen
         posture = self.posture_classifier.predict([joint_values])
-        print(posture)
 
         return posture
 
