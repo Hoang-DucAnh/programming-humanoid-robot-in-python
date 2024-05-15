@@ -18,10 +18,11 @@ class StandingUpAgent(PostureRecognitionAgent):
         posture = self.posture
         # YOUR CODE HERE
 
-        
+        #FOR EACH POSTURE DO THE KEYFRAME / SAME STRUKTURE / DIFFRENT IF STATEMENT 
         if posture == [1]: # BEllY
             print('start')
             #Start KEYFRAME!
+            #HOW DO I START A KEYFRAME!!?!?
 
 
 
