@@ -71,7 +71,7 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
         T = identity(4)
         # YOUR CODE HERE
 
-        self.joinOffsets = {
+        self.jointOffsets = {
             "Head": [
                 [0.0, 0.0, 126.5],  #   Torso   to HeadYaw
                 [0.0, 0.0, 0.0  ],  #   HeadYaw to HeadPitch
@@ -131,7 +131,7 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
             if joint_name in self.chains[chain]:
                 index = self.chains[chain].index(joint_name)
                 for i in range(3):
-                    T[i, 3] = self.joinOffsets[chain][index][i]
+                    T[i, 3] = self.jointOffsets[chain][index][i]
 
 
         return T
