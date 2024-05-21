@@ -11,8 +11,11 @@
 
 
 from forward_kinematics import ForwardKinematicsAgent
-from numpy.matlib import identity
+from numpy.matlib import identity, matrix,linalg
 
+from math import atan2
+from scipy.linalg import pinv
+import numpy as np
 
 class InverseKinematicsAgent(ForwardKinematicsAgent):
     def inverse_kinematics(self, effector_name, transform):
@@ -24,12 +27,67 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         '''
         joint_angles = []
         # YOUR CODE HERE
+
+        def from_trans(m):
+            '''get x, y, theta from transform matrix'''
+            return [m[-1, 0],  m[-1, 1],  m[-1, 2],  atan2(m[2, 1], m[2, 2]) ]
+
+
+
+        for joint in self.joint_names:
+            joint_angles[joint] = 0
+
+        joint_angles = {joint : self.perception.joint[joint] for joint in self.chains[effector_name]}
+        #print(joint_angles)
+
+        target = from_trans(transform)
+
+        lambda_ = 1
+        max_step = 0.1
+
+        for i in range (1000):
+        
+            self.forward_kinematics(joint_angles)
+            Ts = [value for value in self.transforms.values()]
+            Te = matrix(
+                [from_trans(Ts[-1])]
+                ).T
+        
+            error = target - Te
+            error[error > max_step] = max_step
+            error[error < -max_step] = -max_step
+
+            
+
+            T = matrix([from_trans(i) for i in Ts[:-1]]).T
+            J = Te - T
+            dT = Te - T
+
+
+            J[0, :] = dT[2, :]  # x
+            J[1, :] = dT[1, :]  # y
+            J[3, :] = dT[0, :]  # z ???
+            J[-1, :] = 1        # angular
+
+
+            d_theta = lambda_ * pinv(J).dot(error)
+            for j, k in enumerate(self.chains[effector_name]):
+                joint_angles[k] += np.asarray(d_theta.T)[0][j]
+
+            if linalg.norm(error) < 1e-4:
+                break
+
+        
         return joint_angles
 
     def set_transforms(self, effector_name, transform):
         '''solve the inverse kinematics and control joints use the results
         '''
         # YOUR CODE HERE
+
+
+
+        
         self.keyframes = ([], [], [])  # the result joint angles have to fill in
 
 if __name__ == '__main__':
