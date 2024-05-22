@@ -34,11 +34,16 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
 
 
 
-        for joint in self.joint_names:
-            joint_angles[joint] = 0
+        
+        
 
         joint_angles = {joint : self.perception.joint[joint] for joint in self.chains[effector_name]}
         #print(joint_angles)
+
+        for joint in self.joint_names:
+            if joint not in joint_angles:
+                joint_angles[joint] = 0
+
 
         target = from_trans(transform)
 
@@ -77,7 +82,7 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
             if linalg.norm(error) < 1e-4:
                 break
 
-        
+        joint_angles = [v for v in joint_angles.values()]
         return joint_angles
 
     def set_transforms(self, effector_name, transform):
@@ -85,10 +90,28 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         '''
         # YOUR CODE HERE
 
+        #names := [str, ...]  # list of joint names
+        names = self.chains[effector_name]
+
+        #times := [[float, float, ...], [float, float, ...], ...]
+        # times is a matrix of floats: Each line corresponding to a joint, and column element to a key.
+        times = [[1.0, 2.0]] * len(names)
+
+        #keys := [[float, [int, float, float], [int, float, float]], ...]
+        keys = [ [
+                    [self.perception.joint[name], [0, 0, 0], [0, 0, 0]],
+                    [self.inverse_kinematics(effector_name, transform)[i], [0, 0, 0], [0, 0, 0]],
+                ] for i, name in enumerate(names)
+                ]
 
 
-        
-        self.keyframes = ([], [], [])  # the result joint angles have to fill in
+        #keyframe := (names, times, keys)
+        self.keyframes = (names, times, keys)  # the result joint angles have to fill in
+        #print(self.keyframes[0])
+        #print(self.keyframes[1])
+        #print(self.keyframes[2])
+
+        #self.keyframes = ([], [], [])  # the result joint angles have to fill in
 
 if __name__ == '__main__':
     agent = InverseKinematicsAgent()
